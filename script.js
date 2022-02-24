@@ -1,7 +1,5 @@
 'use strict';
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
 // BANKIST APP
 
 // Data
@@ -34,6 +32,7 @@ const account4 = {
 };
 
 const accounts = [account1, account2, account3, account4];
+
 // Elements
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
@@ -62,6 +61,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 let currentAccount;
 
+// Display account movements
 const displayMovement = function (movements, sort = false) {
   const mov = sort ? movements.slice().sort((a, b) => a - b) : movements;
   containerMovements.innerHTML = '';
@@ -76,24 +76,27 @@ const displayMovement = function (movements, sort = false) {
     containerMovements.insertAdjacentHTML('afterbegin', str);
   });
 };
-// displayMovement(account1.movements);
 
+// Calculate account total balance
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((accu, curr) => accu + curr, 0);
   labelBalance.textContent = `${acc.balance} €`;
 };
 
 const calcDisplaySummary = function (acc) {
+  // Calculate in balance
   const income = acc.movements
     .filter(mov => mov > 0)
     .reduce((accu, mov) => accu + mov, 0);
   labelSumIn.textContent = `${income}€`;
 
+  // Calculate Out balance
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((accu, mov, i, arr) => accu + mov, 0);
   labelSumOut.textContent = `${Math.abs(out)}€`;
 
+  // Calculate Intersest
   const interest = acc.movements
     .filter(mov => mov > 0)
     .map(mov => (mov * acc.interestRate) / 100)
@@ -102,6 +105,7 @@ const calcDisplaySummary = function (acc) {
   labelSumInterest.textContent = `${interest}€`;
 };
 
+// Create user name
 const creatUserName = function (accs) {
   accs.forEach(function (acc) {
     acc.userName = acc.owner
@@ -113,24 +117,25 @@ const creatUserName = function (accs) {
 };
 creatUserName(accounts);
 
-// Update UI
-
+// Update UI function
 const updateUI = function (acc) {
   displayMovement(acc.movements);
   calcDisplayBalance(acc);
   calcDisplaySummary(acc);
 };
 
-// Event hadler
+// Event handlers
 
 btnLogin.addEventListener('click', function (e) {
   // prevent from loding
   e.preventDefault();
 
+  // Check Current account
   currentAccount = accounts.find(
     acc => acc.userName === inputLoginUsername.value
   );
 
+  // Login access
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
     labelWelcome.textContent = `Good morning ${
       currentAccount.owner.split(' ')[0]
@@ -143,7 +148,6 @@ btnLogin.addEventListener('click', function (e) {
 });
 
 // Transfer money
-
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
   const transferAmount = Number(inputTransferAmount.value);
@@ -165,7 +169,6 @@ btnTransfer.addEventListener('click', function (e) {
 });
 
 // Request loan
-
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
   const loanAmount = Number(inputLoanAmount.value);
@@ -197,12 +200,16 @@ btnClose.addEventListener('click', function (e) {
   inputCloseUsername.value = inputClosePin.value = '';
 });
 
+// Banks Total balance
 const totalBalance = accounts
   .flatMap(el => el.movements)
   .reduce((accu, curr) => accu + curr, 0);
 
+// Sort state variable
 let sorted = false;
-btnSort.addEventListener('click', function() {
+
+// Sort movements
+btnSort.addEventListener('click', function () {
   displayMovement(currentAccount.movements, !sorted);
   sorted = !sorted;
-})
+});
